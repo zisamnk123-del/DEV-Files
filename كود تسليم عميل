@@ -1,0 +1,42 @@
+// --- كود أمر تسليم رتبة عميل ---
+client.on('messageCreate', async (message) => {
+  if (message.author.bot) return;
+  
+  if (!message.content.startsWith('-عميل')) return;
+
+  const allowedRoleID = '1434077770140352643'; 
+
+  if (!message.member.roles.cache.has(allowedRoleID)) return;
+
+  const member = message.mentions.members.first();
+  if (!member) return message.reply('**⚠️ يرجى تحديد العضو (عمل منشن).**');
+
+  const rolesToAdd = ['1434077777673457664']; 
+
+  try {
+    let addedAny = false;
+
+    for (const roleId of rolesToAdd) {
+      const role = message.guild.roles.cache.get(roleId);
+      if (role && !member.roles.cache.has(roleId)) {
+        await member.roles.add(role);
+        addedAny = true;
+      }
+    }
+
+    if (addedAny) {
+      message.reply(`**__ ✅ – تم تسليم العضو ( ${member} ) رتبة عميل بنجاح__**`);
+    } else {
+      message.reply('**ℹ️ العضو يملك الرتبة بالفعل.**');
+    }
+
+  } catch (error) {
+    console.error('Error in -عميل command:', error);
+    message.reply('**❌ حدث خطأ أثناء محاولة إضافة الرتبة.**');
+  }
+});
+
+// --- سطر تسجيل الدخول (يجب أن يكون في النهاية) ---
+client.login(process.env.TOKEN);
+
+module.exports = client;
