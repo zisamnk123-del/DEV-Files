@@ -1,0 +1,50 @@
+// --- 1. كود تثبيت البوت في الروم الصوتي ---
+const { joinVoiceChannel } = require("@discordjs/voice");
+const voiceChannelId = "1434077770140352643"; // تأكد أن هذا هو أيدي الروم الصوتي
+
+client.once("ready", async () => {
+    const connect = async () => {
+        try {
+            const channel = await client.channels.fetch(voiceChannelId);
+            if (channel && channel.type === 2) {
+                joinVoiceChannel({
+                    channelId: channel.id,
+                    guildId: channel.guild.id,
+                    adapterCreator: channel.guild.voiceAdapterCreator,
+                    selfDeaf: false,
+                });
+                console.log(`Connected to voice channel.`);
+            }
+        } catch (e) { console.error("Voice Error:", e); }
+    };
+    connect();
+    setInterval(connect, 120000);
+});
+
+// --- 2. كود الأزرار (الذي طلبته في الصورة الأولى) ---
+client.on('messageCreate', async message => {
+    if (message.author.bot || message.content !== '-1') return;
+
+    // استخدام المكتبات القياسية لضمان عملها في استضافتك
+    const { ButtonBuilder, ActionRowBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
+
+    const embed = new EmbedBuilder()
+        .setColor(0xff0000)
+        .setDescription('**__ الامبد الجديد مع الزر __**');
+
+    const button = new ButtonBuilder()
+        .setCustomId('open_ticket')
+        .setLabel('OpeN')
+        .setStyle(ButtonStyle.Secondary);
+
+    const row = new ActionRowBuilder().addComponents(button);
+
+    await message.channel.send({
+        embeds: [embed],
+        components: [row]
+    });
+});
+
+// --- 3. سطر تسجيل الدخول (يجب أن يكون وحيداً في النهاية) ---
+client.login(process.env.TOKEN);
+module.exports = client;
