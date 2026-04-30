@@ -1,0 +1,62 @@
+// نظام الحضور والانصراف - ماسمح احد يبيعه او ينصبه له 
+const attendance = new Map();
+
+client.on('messageCreate', async (message) => {
+    if (message.author.bot) return;
+    const userId = message.author.id;
+    const now = Date.now();
+
+    // تسجيل الدخول
+    if (message.content === 'د') {
+        let data = attendance.get(userId) || { totalTime: 0, loginCount: 0, lastLogin: null, status: 'off' };
+        if (data.status === 'on') return;
+        
+        data.status = 'on';
+        data.lastLogin = now;
+        data.loginCount++;
+        attendance.set(userId, data);
+
+        return message.reply({ embeds: [{
+            color: 0x2ecc71,
+            description: `**تم تسجيل دخولك**\nالوقت: **${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}**`
+        }]});
+    }
+
+    // تسجيل الخروج
+    if (message.content === 'خ') {
+        let data = attendance.get(userId);
+        if (!data || data.status === 'off') return;
+
+        data.totalTime += (now - data.lastLogin);
+        data.status = 'off';
+        attendance.set(userId, data);
+
+        const h = Math.floor(data.totalTime / 3600000);
+        const m = Math.floor((data.totalTime % 3600000) / 60000);
+
+        return message.reply({ embeds: [{
+            color: 0xe74c3c,
+            description: `**تم تسجيل خروجك**\nإجمالي وقتك الآن: **${h} ساعة و ${m} دقيقة**`
+        }]});
+    }
+
+    // كشف الحضور
+    if (message.content.startsWith('كشف-الحضور')) {
+        const target = message.mentions.users.first() || message.author;
+        const data = attendance.get(target.id) || { totalTime: 0, loginCount: 0, status: 'off' };
+        const h = Math.floor(data.totalTime / 3600000);
+        const m = Math.floor((data.totalTime % 3600000) / 60000);
+
+        return message.reply({ embeds: [{
+            color: 0x3498db,
+            author: { name: `سجل حضور: ${target.username}`, icon_url: target.displayAvatarURL() },
+            thumbnail: { url: target.displayAvatarURL() },
+            fields: [
+                { name: '👤 الحالة الحالية:', value: data.status === 'on' ? '🟢 متواجد' : '🔴 غير متواجد' },
+                { name: '🔢 عدد مرات الدخول:', value: `${data.loginCount} مرة` },
+                { name: '⏳ إجمالي وقت العمل:', value: `${h} ساعة و ${m} دقيقة` }
+            ],
+            footer: { text: 'نظام مراقبة الطاقم الإداري' }
+        }]});
+    }
+});
