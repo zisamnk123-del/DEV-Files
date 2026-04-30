@@ -1,0 +1,24 @@
+client.on('messageCreate', async Message => {
+
+if(Message.content.startsWith(prefix + 'bc')) {
+
+if(!Message.member.roles.cache.has(owner)) return;
+
+let role = '1423721294050103326' // ايدي رتبة الي راح تنرسل لهم البرودكاست 
+
+let content = Message.content.split(' ').slice(1).join(' ')
+
+if(!content) return Message.reply({embeds:[new EmbedBuilder().setAuthor({name: Message.author.username,iconURL: Message.author.displayAvatarURL({dynamic:true})}).setColor(color).setDescription(`**__> - أكـتـب مـحـتـوى الـرسـالـة .__**`)]})
+
+    Message.guild.members.cache.forEach(member => {
+        if (member.roles.cache.has(role)) {
+            member.send({ embeds: [new EmbedBuilder().setColor(color).setTitle(member.guild.name).setDescription(`${content}`)],content:`${member}`})
+
+        }
+})
+
+Message.reply({embeds:[new EmbedBuilder().setAuthor({name: Message.author.username,iconURL: Message.author.displayAvatarURL({dynamic:true})}).setColor(color).setDescription(`**__ تـم أرسـال الـرسـالـة الـى جـمـيـع الأعـضـاء بـنـجـاح .__**`)]})
+
+}
+
+})
